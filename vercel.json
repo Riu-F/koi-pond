@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/koi-pond/:path*",
+      "destination": "/:path*"
+    }
+  ]
+}
