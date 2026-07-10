@@ -1,3 +1,5 @@
+**[✨ Preview here →](https://koi-pond-pixel.vercel.app/)** (also hosted at `riufukazawa.com/liquid-glass`)
+
 # 🐟 Koi Pond
 
 An interactive pixel-art koi pond, rendered entirely to a single HTML `<canvas>`. Koi wander with a
@@ -12,8 +14,6 @@ and rain dimples the surface. Then you touch it.
 It is one dependency-free React component plus a small playground site where you can crank the fish
 (up to 100), their speed and size, rain, lily pads, reeds, and sparkles live, start from a preset,
 then download it and make it your own.
-
-**[✨ Preview here →](https://koi-pond-pixel.vercel.app/)** (also hosted at `riufukazawa.com/liquid-glass`)
 
 ## Quick start
 
