@@ -1,4 +1,4 @@
-**[✨ Preview here →](https://koi-pond-pixel.vercel.app/)** (also hosted at `riufukazawa.com/koi-pond`)
+**[✨ Preview here →](https://riufukazawa.com/koi-pond)**
 
 # 🐟 Koi Pond
 
