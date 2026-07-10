@@ -13,7 +13,7 @@ It is one dependency-free React component plus a small playground site where you
 (up to 100), their speed and size, rain, lily pads, reeds, and sparkles live, start from a preset,
 then download it and make it your own.
 
-**Live demo:** _add your deploy URL here_ (see [Deploy](#deploy))
+**[✨ Preview here →](https://koi-pond-pixel.vercel.app/)** (also hosted at `riufukazawa.com/liquid-glass`)
 
 ## Quick start
 
@@ -106,7 +106,7 @@ It is a static site, so any static host works. It builds to `dist/`.
 - **GitHub Pages:** run `npm run build` and publish `dist/` (set Vite's `base` to `'/koi-pond/'` in
   `vite.config.ts` if it is served from a project subpath).
 
-After deploying, drop the URL into the "Live demo" line above and into `REPO_URL` in `src/App.tsx`.
+If you deploy your own version, update the "Preview" link above and `REPO_URL` in `src/App.tsx`.
 
 ## Tech
 
