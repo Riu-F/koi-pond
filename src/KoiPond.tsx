@@ -19,7 +19,6 @@ import { useEffect, useRef, useState } from 'react';
 const BASE_CANVAS_W   = 480;
 const BASE_CANVAS_H   = 320;
 const DEFAULT_RESOLUTION = { width: BASE_CANVAS_W, height: BASE_CANVAS_H };
-const PIXEL_SIZE      = 5;
 const CAUSTIC_STEP           = 16;
 const WATER_UPDATE_INTERVAL  = 5;
 const MAX_RAIN_RIPPLES       = 15;
@@ -1472,11 +1471,12 @@ function applyPixelFilter(
   source: HTMLCanvasElement,
   w: number,
   h: number,
+  pixelSize: number,
 ) {
   offCtx.drawImage(source, 0, 0);
   const imageData = offCtx.getImageData(0, 0, w, h);
   const data      = imageData.data;
-  const pw        = PIXEL_SIZE;
+  const pw        = Math.max(1, Math.round(pixelSize));
   const result    = ctx.createImageData(w, h);
   const rd        = result.data;
 
@@ -1538,6 +1538,8 @@ export interface KoiPondProps {
   resolution?: { width: number; height: number };
   /** Drawn on the pond floor (under fish/pads), e.g. "404" on the not-found page. */
   underwaterText?: string;
+  /** Extra pixelation: 1 = off, higher values = chunkier blocks (default 1). */
+  pixelSize?: number;
   /** Number of koi. Distributed across size tiers; 7 reproduces the original mix (default 7). */
   fishCount?: number;
   /** Water-surface sparkle count (default 48). */
@@ -1553,7 +1555,7 @@ export interface KoiPondProps {
 export default function KoiPond({
   className,
   style,
-  pixelFilter = false,
+  pixelSize = 1,
   fillContainer = true,
   baseHeight = BASE_CANVAS_H,
   resolution,
@@ -1625,7 +1627,7 @@ export default function KoiPond({
     }
 
     let offCtx: CanvasRenderingContext2D | null = null;
-    if (pixelFilter) {
+    if (pixelSize > 1) {
       const off = document.createElement('canvas');
       off.width  = bounds.w;
       off.height = bounds.h;
@@ -1864,7 +1866,7 @@ export default function KoiPond({
         if (rip.type !== 'rain') rip.draw(ctx!);
       }
 
-      if (offCtx) applyPixelFilter(ctx!, offCtx, canvas!, bounds.w, bounds.h);
+      if (offCtx) applyPixelFilter(ctx!, offCtx, canvas!, bounds.w, bounds.h, pixelSize);
 
       raf = requestAnimationFrame(frame);
     }
@@ -1879,7 +1881,7 @@ export default function KoiPond({
       canvas.removeEventListener('pointerup', handlePointerUp);
       canvas.removeEventListener('pointercancel', handlePointerUp);
     };
-  }, [canvasSize, pixelFilter, underwaterText, fishCount, sparkleCount, lilyPadDensity, reedDensity, rainIntensity]);
+  }, [canvasSize, pixelSize, underwaterText, fishCount, sparkleCount, lilyPadDensity, reedDensity, rainIntensity]);
 
   return (
     <div

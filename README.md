@@ -65,7 +65,7 @@ Every prop is optional; the defaults reproduce the original pond.
 | `lilyPadDensity` | `number` | `1` | Lily-pad density multiplier. `0` clears them; `2` roughly doubles them. |
 | `reedDensity` | `number` | `1` | Edge-reed density multiplier. `0` clears them; `2` roughly doubles them. |
 | `sparkleCount` | `number` | `48` | Number of twinkling sparkles on the water surface. |
-| `pixelFilter` | `boolean` | `false` | Applies an extra chunky pixelation pass over the whole scene. |
+| `pixelSize` | `number` | `1` | Extra pixelation over the whole scene: `1` = off, higher = chunkier blocks. |
 | `underwaterText` | `string` | `undefined` | Faint text drawn on the pond floor, e.g. `"404"`. |
 | `fillContainer` | `boolean` | `true` | Track the container's aspect ratio via `ResizeObserver`. |
 | `baseHeight` | `number` | `320` | Internal pixel height; width is derived from the container aspect. Lower = chunkier pixels + cheaper. |

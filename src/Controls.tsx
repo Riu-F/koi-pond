@@ -78,15 +78,15 @@ export default function Controls({
             onChange={(v) => update('sparkleCount', v)}
           />
 
-          <label className="control control--row">
-            <span className="control__label">Pixelate</span>
-            <input
-              type="checkbox"
-              className="toggle"
-              checked={settings.pixelFilter}
-              onChange={(e) => update('pixelFilter', e.target.checked)}
-            />
-          </label>
+          <Slider
+            label="Pixelate"
+            value={settings.pixelSize}
+            min={1}
+            max={10}
+            step={1}
+            format={(v) => (v <= 1 ? 'off' : `${v}px`)}
+            onChange={(v) => update('pixelSize', v)}
+          />
 
           <label className="control">
             <span className="control__label">Pond-floor text</span>

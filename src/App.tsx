@@ -9,7 +9,7 @@ export interface Settings {
   lilyPadDensity: number;
   reedDensity:    number;
   sparkleCount:   number;
-  pixelFilter:    boolean;
+  pixelSize:      number;
   underwaterText: string;
 }
 
@@ -22,7 +22,7 @@ const DEFAULTS: Settings = {
   lilyPadDensity: 1,
   reedDensity:    1,
   sparkleCount:   48,
-  pixelFilter:    false,
+  pixelSize:      1,
   underwaterText: '',
 };
 
@@ -38,7 +38,7 @@ export default function App() {
       lilyPadDensity: round1(rand(0, 2.5)),
       reedDensity:    round1(rand(0, 2.5)),
       sparkleCount:   Math.round(rand(0, 120)),
-      pixelFilter:    Math.random() > 0.6,
+      pixelSize:      Math.random() > 0.5 ? 1 : Math.round(rand(2, 8)),
     }));
 
   return (
@@ -49,7 +49,7 @@ export default function App() {
         lilyPadDensity={settings.lilyPadDensity}
         reedDensity={settings.reedDensity}
         sparkleCount={settings.sparkleCount}
-        pixelFilter={settings.pixelFilter}
+        pixelSize={settings.pixelSize}
         underwaterText={settings.underwaterText || undefined}
         style={{ position: 'fixed', inset: 0, zIndex: 0 }}
       />
