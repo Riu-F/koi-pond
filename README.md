@@ -9,8 +9,9 @@ and rain dimples the surface. Then you touch it.
   gets (feed one enough and it pops in a little puff, and a fresh koi swims in from the edge).
 - **Swipe** quickly to make a wave that pushes the whole school away.
 
-It is one dependency-free React component plus a small playground site where you can crank the fish,
-rain, lily pads, reeds, and sparkles up and down live, then download it and make it your own.
+It is one dependency-free React component plus a small playground site where you can crank the fish
+(up to 100), their speed and size, rain, lily pads, reeds, and sparkles live, start from a preset,
+then download it and make it your own.
 
 **Live demo:** _add your deploy URL here_ (see [Deploy](#deploy))
 
@@ -60,7 +61,9 @@ Every prop is optional; the defaults reproduce the original pond.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `fishCount` | `number` | `7` | Number of koi, distributed across size tiers (hero / medium / small). |
+| `fishCount` | `number` | `7` | Number of koi (0 to 100 in the playground), distributed across size tiers (hero / medium / small). |
+| `fishSpeed` | `number` | `1` | Global swim-speed multiplier (applies live, no scene rebuild). |
+| `fishSize` | `number` | `1` | Global koi size multiplier (applies live). |
 | `rainIntensity` | `number` | `1` | Ambient rain multiplier. `0` stops the rain; `2` roughly doubles it. |
 | `lilyPadDensity` | `number` | `1` | Lily-pad density multiplier. `0` clears them; `2` roughly doubles them. |
 | `reedDensity` | `number` | `1` | Edge-reed density multiplier. `0` clears them; `2` roughly doubles them. |

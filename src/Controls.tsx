@@ -9,6 +9,7 @@ interface ControlsProps {
   open:        boolean;
   onToggle:    () => void;
   repoUrl:     string;
+  presets:     Record<string, Settings>;
 }
 
 export default function Controls({
@@ -19,6 +20,7 @@ export default function Controls({
   open,
   onToggle,
   repoUrl,
+  presets,
 }: ControlsProps) {
   const update = <K extends keyof Settings>(key: K, value: Settings[K]) =>
     setSettings((s) => ({ ...s, [key]: value }));
@@ -34,13 +36,39 @@ export default function Controls({
         <div className="panel__body">
           <p className="panel__hint">Click to ripple &middot; hold to feed &middot; swipe to scatter</p>
 
+          <div className="presets">
+            {Object.entries(presets).map(([name, preset]) => (
+              <button key={name} className="preset" onClick={() => setSettings(preset)}>
+                {name}
+              </button>
+            ))}
+          </div>
+
           <Slider
             label="Fish"
             value={settings.fishCount}
             min={0}
-            max={40}
+            max={100}
             step={1}
             onChange={(v) => update('fishCount', v)}
+          />
+          <Slider
+            label="Speed"
+            value={settings.fishSpeed}
+            min={0.1}
+            max={3}
+            step={0.1}
+            format={(v) => `${v.toFixed(1)}×`}
+            onChange={(v) => update('fishSpeed', v)}
+          />
+          <Slider
+            label="Fish size"
+            value={settings.fishSize}
+            min={0.5}
+            max={2.5}
+            step={0.1}
+            format={(v) => `${v.toFixed(1)}×`}
+            onChange={(v) => update('fishSize', v)}
           />
           <Slider
             label="Rain"

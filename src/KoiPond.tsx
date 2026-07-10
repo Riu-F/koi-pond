@@ -993,7 +993,7 @@ class Fish {
     this.fleeVy += (dy / d) * force;
   }
 
-  update(dt: number, smoothNoise: SmoothNoise, b: Bounds, food: FoodPellet[]) {
+  update(dt: number, smoothNoise: SmoothNoise, b: Bounds, food: FoodPellet[], speedScale: number) {
     this.foodTarget = null;
     let nearestFood = Infinity;
 
@@ -1068,10 +1068,10 @@ class Fish {
     if (Math.abs(this.fleeVy) < 0.01) this.fleeVy = 0;
 
     const fleeSpeed = Math.sqrt(this.fleeVx ** 2 + this.fleeVy ** 2);
-    this.speed      = Math.min(this.baseSpeed + fleeSpeed, this.maxSpeed);
+    this.speed      = Math.min(this.baseSpeed * speedScale + fleeSpeed, this.maxSpeed * Math.max(1, speedScale));
 
-    const vx = Math.cos(this.heading) * effectiveBaseSpeed + this.fleeVx;
-    const vy = Math.sin(this.heading) * effectiveBaseSpeed + this.fleeVy;
+    const vx = Math.cos(this.heading) * effectiveBaseSpeed * speedScale + this.fleeVx;
+    const vy = Math.sin(this.heading) * effectiveBaseSpeed * speedScale + this.fleeVy;
     this.x += vx;
     this.y += vy;
     const edge = sc(b, 6);
@@ -1187,7 +1187,7 @@ class Fish {
     c.restore();
   }
 
-  draw(c: CanvasRenderingContext2D, t: number) {
+  draw(c: CanvasRenderingContext2D, t: number, sizeScale: number) {
     const speedFactor = this.speed / this.maxSpeed;
     const tailFreq    = 3 + speedFactor * 8;
     const tailAmp     = 0.3 + speedFactor * 0.5;
@@ -1204,7 +1204,7 @@ class Fish {
     ];
     const bodyC    = dim(this.bodyColor);
     const gillC    = darkenVec3(bodyC, 0.3);
-    const s        = this.size * depthScale;
+    const s        = this.size * depthScale * sizeScale;
     const dorsalBob  = Math.sin(t * tailFreq * 0.5 + this.finPhase) * s * 0.012 * (0.4 + speedFactor);
     const bodyPath   = this.getBodyPath(s);
 
@@ -1542,6 +1542,10 @@ export interface KoiPondProps {
   pixelSize?: number;
   /** Number of koi. Distributed across size tiers; 7 reproduces the original mix (default 7). */
   fishCount?: number;
+  /** Fish speed multiplier (1 = default pace, higher = faster; default 1). */
+  fishSpeed?: number;
+  /** Fish size multiplier, scales every koi visually (default 1). */
+  fishSize?: number;
   /** Water-surface sparkle count (default 48). */
   sparkleCount?: number;
   /** Lily-pad density multiplier — 0 clears them, 2 roughly doubles them (default 1). */
@@ -1561,6 +1565,8 @@ export default function KoiPond({
   resolution,
   underwaterText,
   fishCount = 7,
+  fishSpeed = 1,
+  fishSize = 1,
   sparkleCount = NUM_SPARKLES,
   lilyPadDensity = 1,
   reedDensity = 1,
@@ -1569,6 +1575,15 @@ export default function KoiPond({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef    = useRef<HTMLCanvasElement | null>(null);
   const [canvasSize, setCanvasSize] = useState<{ width: number; height: number } | null>(null);
+
+  /* Live fish speed/size read by the render loop each frame, so dragging these
+     sliders changes the pond in place without rebuilding the whole scene. */
+  const fishSpeedRef = useRef(fishSpeed);
+  const fishSizeRef  = useRef(fishSize);
+  useEffect(() => {
+    fishSpeedRef.current = fishSpeed;
+    fishSizeRef.current  = fishSize;
+  }, [fishSpeed, fishSize]);
 
   /* Measure container → canvas pixel dimensions (no CSS stretch distortion). */
   useEffect(() => {
@@ -1798,7 +1813,7 @@ export default function KoiPond({
 
       /* 7 — fish */
       for (const f of fish) {
-        f.update(dt, smoothNoise, bounds, foodPellets);
+        f.update(dt, smoothNoise, bounds, foodPellets, fishSpeedRef.current);
       }
 
       for (let i = fish.length - 1; i >= 0; i--) {
@@ -1839,7 +1854,7 @@ export default function KoiPond({
 
       for (const f of fish) {
         ctx!.globalAlpha = 0.35 + f.depth * 0.55;
-        f.draw(ctx!, time);
+        f.draw(ctx!, time, fishSizeRef.current);
         ctx!.globalAlpha = 1;
       }
 

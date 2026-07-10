@@ -68,6 +68,30 @@
   color: rgba(214, 236, 239, 0.55);
 }
 
+/* ── Presets ────────────────────────────────────────────────────── */
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.preset {
+  flex: 1 1 auto;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 200, 210, 0.25);
+  background: rgba(120, 200, 210, 0.08);
+  color: #d6ecef;
+  font: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.preset:hover {
+  background: rgba(120, 200, 210, 0.2);
+}
+
 /* ── Controls ───────────────────────────────────────────────────── */
 .control {
   display: flex;
