@@ -1,0 +1,44 @@
+{
+  "name": "koi-pond",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "An interactive pixel-art koi pond rendered to a single HTML canvas. Click to ripple, hold to feed, swipe to scatter. A dependency-free React component plus a live playground.",
+  "author": "Riu Fukazawa (https://riufukazawa.com)",
+  "license": "MIT",
+  "homepage": "https://github.com/Riu-F/koi-pond",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Riu-F/koi-pond.git"
+  },
+  "keywords": [
+    "koi",
+    "pond",
+    "canvas",
+    "pixel-art",
+    "react",
+    "generative",
+    "interactive",
+    "animation",
+    "fish"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "oxlint": "^1.71.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.1"
+  }
+}
