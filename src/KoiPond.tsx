@@ -1554,6 +1554,9 @@ export interface KoiPondProps {
   reedDensity?: number;
   /** Rain intensity multiplier — 0 stops the rain, 2 roughly doubles it (default 1). */
   rainIntensity?: number;
+  /** Frames between water-layer refreshes — higher is cheaper, slightly choppier
+   *  caustics. Useful to raise for embedded/background ponds (default 5). */
+  waterInterval?: number;
 }
 
 export default function KoiPond({
@@ -1571,6 +1574,7 @@ export default function KoiPond({
   lilyPadDensity = 1,
   reedDensity = 1,
   rainIntensity = 1,
+  waterInterval = WATER_UPDATE_INTERVAL,
 }: KoiPondProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef    = useRef<HTMLCanvasElement | null>(null);
@@ -1636,7 +1640,8 @@ export default function KoiPond({
     waterCanvas.width  = bounds.w;
     waterCanvas.height = bounds.h;
     const waterCtx = waterCanvas.getContext('2d');
-    let waterFrameCounter = WATER_UPDATE_INTERVAL;
+    const waterUpdateInterval = Math.max(1, Math.round(waterInterval));
+    let waterFrameCounter = waterUpdateInterval;
     if (waterCtx) {
       renderWaterLayer(waterCtx, bounds, causticStep, 0, sparkles, lightPatches, underwaterText);
     }
@@ -1750,8 +1755,21 @@ export default function KoiPond({
     };
     document.addEventListener('visibilitychange', onVisibility);
 
+    /* Pause rendering while scrolled out of view (e.g. an embedded pond in a
+       bento grid). The rAF keeps ticking but skips all draw work, and time is
+       resynced on re-entry so the scene doesn't jump. */
+    let onScreen = true;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting;
+        if (onScreen) lastTime = performance.now();
+      },
+      { threshold: 0 },
+    );
+    if (containerRef.current) io.observe(containerRef.current);
+
     function frame(now: number) {
-      if (document.hidden) {
+      if (document.hidden || !onScreen) {
         raf = requestAnimationFrame(frame);
         return;
       }
@@ -1787,7 +1805,7 @@ export default function KoiPond({
 
       /* 1–4 — cached water layer (caustics, sparkles, light patches, floor text) */
       waterFrameCounter++;
-      if (waterFrameCounter >= WATER_UPDATE_INTERVAL && waterCtx) {
+      if (waterFrameCounter >= waterUpdateInterval && waterCtx) {
         waterFrameCounter = 0;
         renderWaterLayer(
           waterCtx,
@@ -1890,13 +1908,14 @@ export default function KoiPond({
 
     return () => {
       cancelAnimationFrame(raf);
+      io.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
       canvas.removeEventListener('pointerdown', handlePointerDown);
       canvas.removeEventListener('pointermove', handlePointerMove);
       canvas.removeEventListener('pointerup', handlePointerUp);
       canvas.removeEventListener('pointercancel', handlePointerUp);
     };
-  }, [canvasSize, pixelSize, underwaterText, fishCount, sparkleCount, lilyPadDensity, reedDensity, rainIntensity]);
+  }, [canvasSize, pixelSize, underwaterText, fishCount, sparkleCount, lilyPadDensity, reedDensity, rainIntensity, waterInterval]);
 
   return (
     <div

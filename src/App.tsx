@@ -30,6 +30,57 @@ const DEFAULTS: Settings = {
   underwaterText: '',
 };
 
+/* ── Embed mode ───────────────────────────────────────────────────────
+   Add `?embed=1` to run chromeless (no control panel, no corner credit) so
+   the pond can be dropped into an <iframe> — e.g. a portfolio bento tile.
+   Every setting is overridable from the query string, plus `height` to lower
+   the internal render resolution for a small tile. The pond stays fully
+   pointer-interactive (click to ripple, hold to feed, swipe to scatter).
+
+     ?embed=1&fish=3&rain=0&reeds=0&lilypads=0.5&sparkles=12&height=180
+*/
+interface EmbedConfig {
+  embed:      boolean;
+  settings:   Settings;
+  baseHeight: number | undefined;
+}
+
+function num(params: URLSearchParams, key: string, fallback: number): number {
+  const raw = params.get(key);
+  if (raw === null) return fallback;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function readEmbedConfig(): EmbedConfig {
+  const params = new URLSearchParams(
+    typeof window === 'undefined' ? '' : window.location.search,
+  );
+  const embed = params.get('embed') === '1' || params.get('embed') === 'true';
+
+  const settings: Settings = {
+    fishCount:      num(params, 'fish',     DEFAULTS.fishCount),
+    fishSpeed:      num(params, 'speed',    DEFAULTS.fishSpeed),
+    fishSize:       num(params, 'size',     DEFAULTS.fishSize),
+    rainIntensity:  num(params, 'rain',     DEFAULTS.rainIntensity),
+    lilyPadDensity: num(params, 'lilypads', DEFAULTS.lilyPadDensity),
+    reedDensity:    num(params, 'reeds',    DEFAULTS.reedDensity),
+    sparkleCount:   num(params, 'sparkles', DEFAULTS.sparkleCount),
+    pixelSize:      num(params, 'pixel',    DEFAULTS.pixelSize),
+    underwaterText: params.get('text') ?? DEFAULTS.underwaterText,
+  };
+
+  const heightRaw = params.get('height');
+  const baseHeight =
+    heightRaw !== null && Number.isFinite(Number(heightRaw))
+      ? Number(heightRaw)
+      : undefined;
+
+  return { embed, settings, baseHeight };
+}
+
+const EMBED = readEmbedConfig();
+
 const PRESETS: Record<string, Settings> = {
   Calm:  { fishCount: 4,  fishSpeed: 0.5, fishSize: 1.3, rainIntensity: 0,   lilyPadDensity: 0.6, reedDensity: 0.5, sparkleCount: 30,  pixelSize: 1, underwaterText: '' },
   Rain:  { fishCount: 8,  fishSpeed: 1,   fishSize: 1,   rainIntensity: 2.6, lilyPadDensity: 1,   reedDensity: 1,   sparkleCount: 60,  pixelSize: 1, underwaterText: '' },
@@ -38,7 +89,9 @@ const PRESETS: Record<string, Settings> = {
 };
 
 export default function App() {
-  const [settings, setSettings] = useState<Settings>(DEFAULTS);
+  const [settings, setSettings] = useState<Settings>(
+    EMBED.embed ? EMBED.settings : DEFAULTS,
+  );
   const [panelOpen, setPanelOpen] = useState(true);
 
   const randomise = () =>
@@ -66,23 +119,29 @@ export default function App() {
         sparkleCount={settings.sparkleCount}
         pixelSize={settings.pixelSize}
         underwaterText={settings.underwaterText || undefined}
+        baseHeight={EMBED.baseHeight}
         style={{ position: 'fixed', inset: 0, zIndex: 0 }}
       />
 
-      <Controls
-        settings={settings}
-        setSettings={setSettings}
-        onReset={() => setSettings(DEFAULTS)}
-        onRandomise={randomise}
-        open={panelOpen}
-        onToggle={() => setPanelOpen((o) => !o)}
-        repoUrl={REPO_URL}
-        presets={PRESETS}
-      />
+      {/* Chrome (control panel + credit) is hidden in embed mode. */}
+      {!EMBED.embed && (
+        <>
+          <Controls
+            settings={settings}
+            setSettings={setSettings}
+            onReset={() => setSettings(DEFAULTS)}
+            onRandomise={randomise}
+            open={panelOpen}
+            onToggle={() => setPanelOpen((o) => !o)}
+            repoUrl={REPO_URL}
+            presets={PRESETS}
+          />
 
-      <a className="credit" href="https://riufukazawa.com" target="_blank" rel="noreferrer">
-        riufukazawa.com
-      </a>
+          <a className="credit" href="https://riufukazawa.com" target="_blank" rel="noreferrer">
+            riufukazawa.com
+          </a>
+        </>
+      )}
     </main>
   );
 }
