@@ -1557,6 +1557,11 @@ export interface KoiPondProps {
   /** Frames between water-layer refreshes — higher is cheaper, slightly choppier
    *  caustics. Useful to raise for embedded/background ponds (default 5). */
   waterInterval?: number;
+  /** When set, a quick tap navigates the top-level window here instead of
+   *  spawning a ripple (a "clickable tile" mode for embeds). Hold-to-feed is
+   *  unaffected. Also lowers the hover-move ripple threshold, so ripples
+   *  come from casually moving the mouse rather than needing a fast swipe. */
+  navigateUrl?: string;
 }
 
 export default function KoiPond({
@@ -1575,6 +1580,7 @@ export default function KoiPond({
   reedDensity = 1,
   rainIntensity = 1,
   waterInterval = WATER_UPDATE_INTERVAL,
+  navigateUrl,
 }: KoiPondProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef    = useRef<HTMLCanvasElement | null>(null);
@@ -1713,7 +1719,8 @@ export default function KoiPond({
         const dt       = now - lastMouseTime;
         const speed    = dt > 0 ? moveDist / dt : 0;
 
-        if (speed > 200 * bounds.scale && mouseSwipeCooldown <= 0) {
+        const swipeSpeedThreshold = (navigateUrl ? 40 : 200) * bounds.scale;
+        if (speed > swipeSpeedThreshold && mouseSwipeCooldown <= 0) {
           ripples.push(new Ripple(mx, my, 'swipe', bounds.scale));
           for (const f of fish) {
             if (dist(f.x, f.y, mx, my) < sc(bounds, 80)) f.flee(mx, my, 10);
@@ -1730,10 +1737,18 @@ export default function KoiPond({
     function handlePointerUp() {
       const now = performance.now() / 1000;
       if (pointerDown && !pointerIsHold && now - pointerDownTime < 0.2) {
-        ripples.push(new Ripple(pointerX, pointerY, 'user', bounds.scale));
-        for (const f of fish) {
-          if (dist(f.x, f.y, pointerX, pointerY) < sc(bounds, 100)) {
-            f.flee(pointerX, pointerY, 15);
+        if (navigateUrl) {
+          try {
+            (window.top ?? window).location.href = navigateUrl;
+          } catch {
+            window.location.href = navigateUrl;
+          }
+        } else {
+          ripples.push(new Ripple(pointerX, pointerY, 'user', bounds.scale));
+          for (const f of fish) {
+            if (dist(f.x, f.y, pointerX, pointerY) < sc(bounds, 100)) {
+              f.flee(pointerX, pointerY, 15);
+            }
           }
         }
       }
@@ -1915,7 +1930,7 @@ export default function KoiPond({
       canvas.removeEventListener('pointerup', handlePointerUp);
       canvas.removeEventListener('pointercancel', handlePointerUp);
     };
-  }, [canvasSize, pixelSize, underwaterText, fishCount, sparkleCount, lilyPadDensity, reedDensity, rainIntensity, waterInterval]);
+  }, [canvasSize, pixelSize, underwaterText, fishCount, sparkleCount, lilyPadDensity, reedDensity, rainIntensity, waterInterval, navigateUrl]);
 
   return (
     <div

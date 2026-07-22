@@ -35,14 +35,18 @@ const DEFAULTS: Settings = {
    the pond can be dropped into an <iframe> — e.g. a portfolio bento tile.
    Every setting is overridable from the query string, plus `height` to lower
    the internal render resolution for a small tile. The pond stays fully
-   pointer-interactive (click to ripple, hold to feed, swipe to scatter).
+   pointer-interactive (click to ripple, hold to feed, swipe to scatter) —
+   unless `nav` is set, in which case a tap navigates there instead of
+   rippling, and gentle hover movement ripples in place of a fast swipe.
 
      ?embed=1&fish=3&rain=0&reeds=0&lilypads=0.5&sparkles=12&height=180
+     &nav=https%3A%2F%2Friufukazawa.com%2Fkoi-pond
 */
 interface EmbedConfig {
-  embed:      boolean;
-  settings:   Settings;
-  baseHeight: number | undefined;
+  embed:       boolean;
+  settings:    Settings;
+  baseHeight:  number | undefined;
+  navigateUrl: string | undefined;
 }
 
 function num(params: URLSearchParams, key: string, fallback: number): number {
@@ -76,7 +80,9 @@ function readEmbedConfig(): EmbedConfig {
       ? Number(heightRaw)
       : undefined;
 
-  return { embed, settings, baseHeight };
+  const navigateUrl = params.get('nav') ?? undefined;
+
+  return { embed, settings, baseHeight, navigateUrl };
 }
 
 const EMBED = readEmbedConfig();
@@ -120,6 +126,7 @@ export default function App() {
         pixelSize={settings.pixelSize}
         underwaterText={settings.underwaterText || undefined}
         baseHeight={EMBED.baseHeight}
+        navigateUrl={EMBED.navigateUrl}
         style={{ position: 'fixed', inset: 0, zIndex: 0 }}
       />
 
