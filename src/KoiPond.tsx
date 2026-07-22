@@ -1562,6 +1562,12 @@ export interface KoiPondProps {
    *  unaffected. Also lowers the hover-move ripple threshold, so ripples
    *  come from casually moving the mouse rather than needing a fast swipe. */
   navigateUrl?: string;
+  /** Global visual-size multiplier for every entity (fish, pads, reeds,
+   *  ripples, caustics) — the camera framing and fish swim range are
+   *  unchanged, so nothing gets cropped out; things just render bigger
+   *  (default 1). Handy for small embeds where the default density reads
+   *  too busy/small. */
+  scale?: number;
 }
 
 export default function KoiPond({
@@ -1581,6 +1587,7 @@ export default function KoiPond({
   rainIntensity = 1,
   waterInterval = WATER_UPDATE_INTERVAL,
   navigateUrl,
+  scale = 1,
 }: KoiPondProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef    = useRef<HTMLCanvasElement | null>(null);
@@ -1625,7 +1632,16 @@ export default function KoiPond({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const bounds = makeBounds(canvasSize.width, canvasSize.height);
+    /* `scale` inflates every entity's size (fish, pads, reeds, ripples,
+       caustics) without moving the camera — positions are fractions of
+       bounds.w/h, untouched by bounds.scale, so nothing gets cropped out
+       of frame the way a CSS zoom would. */
+    const resolutionBounds = makeBounds(canvasSize.width, canvasSize.height);
+    const visualScale = Math.max(0.25, scale);
+    const bounds: Bounds =
+      visualScale === 1
+        ? resolutionBounds
+        : { ...resolutionBounds, scale: resolutionBounds.scale * visualScale };
     const causticStep = Math.max(12, Math.round(CAUSTIC_STEP * bounds.scale));
     canvas.width  = bounds.w;
     canvas.height = bounds.h;
@@ -1719,7 +1735,7 @@ export default function KoiPond({
         const dt       = now - lastMouseTime;
         const speed    = dt > 0 ? moveDist / dt : 0;
 
-        const swipeSpeedThreshold = (navigateUrl ? 40 : 200) * bounds.scale;
+        const swipeSpeedThreshold = (navigateUrl ? 150 : 200) * bounds.scale;
         if (speed > swipeSpeedThreshold && mouseSwipeCooldown <= 0) {
           ripples.push(new Ripple(mx, my, 'swipe', bounds.scale));
           for (const f of fish) {
@@ -1930,7 +1946,7 @@ export default function KoiPond({
       canvas.removeEventListener('pointerup', handlePointerUp);
       canvas.removeEventListener('pointercancel', handlePointerUp);
     };
-  }, [canvasSize, pixelSize, underwaterText, fishCount, sparkleCount, lilyPadDensity, reedDensity, rainIntensity, waterInterval, navigateUrl]);
+  }, [canvasSize, pixelSize, underwaterText, fishCount, sparkleCount, lilyPadDensity, reedDensity, rainIntensity, waterInterval, navigateUrl, scale]);
 
   return (
     <div

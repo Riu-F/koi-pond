@@ -34,19 +34,22 @@ const DEFAULTS: Settings = {
    Add `?embed=1` to run chromeless (no control panel, no corner credit) so
    the pond can be dropped into an <iframe> — e.g. a portfolio bento tile.
    Every setting is overridable from the query string, plus `height` to lower
-   the internal render resolution for a small tile. The pond stays fully
+   the internal render resolution for a small tile, and `scale` to inflate
+   every entity's size without moving the camera (handy at small sizes,
+   where the default density reads too busy). The pond stays fully
    pointer-interactive (click to ripple, hold to feed, swipe to scatter) —
    unless `nav` is set, in which case a tap navigates there instead of
    rippling, and gentle hover movement ripples in place of a fast swipe.
 
      ?embed=1&fish=3&rain=0&reeds=0&lilypads=0.5&sparkles=12&height=180
-     &nav=https%3A%2F%2Friufukazawa.com%2Fkoi-pond
+     &scale=1.6&nav=https%3A%2F%2Friufukazawa.com%2Fkoi-pond
 */
 interface EmbedConfig {
   embed:       boolean;
   settings:    Settings;
   baseHeight:  number | undefined;
   navigateUrl: string | undefined;
+  scale:       number | undefined;
 }
 
 function num(params: URLSearchParams, key: string, fallback: number): number {
@@ -82,7 +85,13 @@ function readEmbedConfig(): EmbedConfig {
 
   const navigateUrl = params.get('nav') ?? undefined;
 
-  return { embed, settings, baseHeight, navigateUrl };
+  const scaleRaw = params.get('scale');
+  const scale =
+    scaleRaw !== null && Number.isFinite(Number(scaleRaw))
+      ? Number(scaleRaw)
+      : undefined;
+
+  return { embed, settings, baseHeight, navigateUrl, scale };
 }
 
 const EMBED = readEmbedConfig();
@@ -127,6 +136,7 @@ export default function App() {
         underwaterText={settings.underwaterText || undefined}
         baseHeight={EMBED.baseHeight}
         navigateUrl={EMBED.navigateUrl}
+        scale={EMBED.scale}
         style={{ position: 'fixed', inset: 0, zIndex: 0 }}
       />
 
